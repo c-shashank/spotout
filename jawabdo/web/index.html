@@ -40,8 +40,12 @@ nav { position:fixed; top:0; left:0; right:0; z-index:999; display:flex; justify
 @keyframes gridPan { 0%{background-position:0 0} 100%{background-position:60px 60px} }
 .hero-orb { position:absolute; right:-100px; top:50%; transform:translateY(-50%); width:500px; height:500px; border-radius:50%; background:radial-gradient(circle at 40% 40%,rgba(204,51,0,0.18),rgba(204,51,0,0.03) 60%,transparent 80%); animation:orbPulse 4s ease-in-out infinite; filter:blur(1px); }
 @keyframes orbPulse { 0%,100%{transform:translateY(-50%) scale(1);opacity:0.8} 50%{transform:translateY(-52%) scale(1.06);opacity:1} }
-.hero-fist { position:absolute; right:6vw; top:50%; transform:translateY(-52%); width:clamp(220px,28vw,420px); opacity:0; animation:fistReveal 0.9s cubic-bezier(0.16,1,0.3,1) 0.6s forwards; filter:drop-shadow(0 0 40px rgba(204,51,0,0.45)); pointer-events:none; }
-@keyframes fistReveal { 0%{opacity:0;transform:translateY(-40%) scale(0.88)} 100%{opacity:1;transform:translateY(-52%) scale(1)} }
+.fist-group { position:absolute; right:4vw; top:50%; transform:translateY(-50%); display:flex; align-items:flex-end; gap:clamp(-20px,-2vw,-8px); pointer-events:none; }
+.fist-group img { width:clamp(100px,13vw,190px); opacity:0; filter:drop-shadow(0 0 24px rgba(204,51,0,0.5)); }
+.fist-l { transform:rotate(-18deg) translateY(18%); animation:fistUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.5s forwards; }
+.fist-c { transform:rotate(4deg) translateY(0%); animation:fistUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.7s forwards; filter:drop-shadow(0 0 32px rgba(204,51,0,0.65)) !important; }
+.fist-r { transform:rotate(20deg) translateY(22%); animation:fistUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.9s forwards; }
+@keyframes fistUp { 0%{opacity:0;transform:translateY(40px) rotate(var(--r,0deg))} 100%{opacity:1;transform:translateY(var(--ty,0%)) rotate(var(--r,0deg))} }
 .hero-content { position:relative; z-index:2; max-width:1100px; margin:0 auto; width:100%; flex:1; display:flex; flex-direction:column; justify-content:center; padding:5rem 2.5rem 1.5rem; }
 .hero-eyebrow { display:flex; align-items:center; gap:0.8rem; font-size:0.6rem; letter-spacing:5px; text-transform:uppercase; color:var(--rage); margin-bottom:0.8rem; opacity:0; animation:slideRight 0.7s 0.3s forwards; }
 .eyebrow-dot { width:8px; height:8px; border-radius:50%; background:var(--rage); animation:blink 1.4s infinite; }
@@ -263,7 +267,11 @@ footer { position:relative; z-index:2; background:#040404; border-top:1px solid 
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-orb"></div>
-  <img class="hero-fist" src="fist.png" alt="Clenched fist — resolution" />
+  <div class="fist-group">
+    <img class="fist-l" src="fist.png" alt="" />
+    <img class="fist-c" src="fist.png" alt="" />
+    <img class="fist-r" src="fist.png" alt="" />
+  </div>
   <div class="hero-content">
     <div class="hero-eyebrow">
       <div class="eyebrow-dot"></div>
