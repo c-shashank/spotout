@@ -26,13 +26,35 @@ class EngagementRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
       child: Row(
         children: [
-          // Upvote
-          _ActionButton(
-            icon: Icons.sports_mma,
-            count: issue.upvoteCount,
-            active: issue.userHasUpvoted == true,
-            activeColor: AppColors.accent,
+          // Upvote — fist image
+          GestureDetector(
             onTap: onUpvote,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/fist.png',
+                  width: 18,
+                  height: 18,
+                  color: issue.userHasUpvoted == true
+                      ? AppColors.accent
+                      : AppColors.secondaryText,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${issue.upvoteCount}',
+                  style: GoogleFonts.sourceCodePro(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: issue.userHasUpvoted == true
+                        ? AppColors.accent
+                        : AppColors.primaryText,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(width: 12),
           // Downvote
