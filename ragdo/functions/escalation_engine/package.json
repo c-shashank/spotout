@@ -1,0 +1,6 @@
+{
+  "name": "escalation-engine",
+  "version": "1.0.0",
+  "description": "Ragdo escalation engine — Supabase Edge Function",
+  "main": "index.ts"
+}

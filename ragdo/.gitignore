@@ -1,0 +1,50 @@
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Android
+android/local.properties
+android/.gradle/
+android/app/release/
+android/key.jks
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Firebase (GITIGNORE THESE — they contain sensitive keys)
+google-services.json
+GoogleService-Info.plist
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Environment
+.env
+*.env.local
+*.env.production
+
+# Logs
+flutter_*.log
+
+# Coverage
+coverage/
+
+# macOS
+.DS_Store
+
+# node_modules (for functions)
+functions/node_modules/
+functions/.env

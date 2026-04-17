@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Jawab Do — India's civic accountability app. Report issues, build community pressure, auto-escalate until officials respond.">
+<meta name="apple-mobile-web-app-title" content="Jawab Do">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icons/Icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Jawab Do — Jawab do. Abhi.</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --rage: #CC3300; --rage2: #FF4422;
+  --ink: #080808; --paper: #F4EFE6;
+  --green: #1a6b3a; --warn: #e6a817; --blue: #1a3acc;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--ink); color: var(--paper); font-family: 'Space Mono', monospace; overflow-x: hidden; }
+
+#particles-canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; opacity:0.5; }
+
+/* NAV */
+nav { position:fixed; top:0; left:0; right:0; z-index:999; display:flex; justify-content:space-between; align-items:center; padding:1.2rem 2.5rem; background:rgba(8,8,8,0.88); backdrop-filter:blur(20px); border-bottom:1px solid rgba(204,51,0,0.3); }
+.nav-logo { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:4px; color:var(--paper); }
+.nav-logo em { color:var(--rage); font-style:normal; }
+.nav-actions { display:flex; align-items:center; gap:0.8rem; }
+.nav-app-link { font-family:'Space Mono',monospace; font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:#aaa; text-decoration:none; padding:0.55rem 1rem; border:1px solid #333; transition:color 0.15s,border-color 0.15s; }
+.nav-app-link:hover { color:var(--paper); border-color:#666; }
+.nav-pill { display:flex; align-items:center; gap:0.5rem; background:var(--rage); color:white; font-family:'Space Mono',monospace; font-size:0.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:0.55rem 1.2rem; border:none; cursor:pointer; clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%); transition:background 0.15s,transform 0.15s; }
+.nav-pill:hover { background:var(--rage2); transform:scale(1.04); }
+
+/* HERO */
+.hero { position:relative; min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:9rem 2.5rem 5rem; overflow:hidden; z-index:1; }
+.hero-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(204,51,0,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(204,51,0,0.06) 1px,transparent 1px); background-size:60px 60px; animation:gridPan 20s linear infinite; }
+@keyframes gridPan { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+.hero-orb { position:absolute; right:-100px; top:50%; transform:translateY(-50%); width:600px; height:600px; border-radius:50%; background:radial-gradient(circle at 40% 40%,rgba(204,51,0,0.35),rgba(204,51,0,0.05) 60%,transparent 80%); animation:orbPulse 4s ease-in-out infinite; filter:blur(1px); }
+@keyframes orbPulse { 0%,100%{transform:translateY(-50%) scale(1);opacity:0.8} 50%{transform:translateY(-52%) scale(1.06);opacity:1} }
+.hero-content { position:relative; z-index:2; max-width:1100px; margin:0 auto; width:100%; }
+.hero-eyebrow { display:flex; align-items:center; gap:0.8rem; font-size:0.6rem; letter-spacing:5px; text-transform:uppercase; color:var(--rage); margin-bottom:1.5rem; opacity:0; animation:slideRight 0.7s 0.3s forwards; }
+.eyebrow-dot { width:8px; height:8px; border-radius:50%; background:var(--rage); animation:blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(5rem,13vw,11rem); line-height:0.88; letter-spacing:-0.01em; overflow:hidden; }
+.h1-line { display:block; opacity:0; transform:translateY(100%); animation:lineReveal 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+.h1-line:nth-child(1){animation-delay:0.5s}
+.h1-line:nth-child(2){animation-delay:0.65s;color:var(--rage)}
+.h1-line:nth-child(3){animation-delay:0.8s}
+@keyframes lineReveal { to{opacity:1;transform:translateY(0)} }
+.hero-devanagari { font-size:clamp(1rem,2vw,1.4rem); color:rgba(204,51,0,0.6); letter-spacing:4px; margin-top:0.6rem; opacity:0; animation:fadeUp 0.7s 0.95s forwards; font-family:'Barlow Condensed',sans-serif; font-weight:300; }
+.hero-tagline { font-family:'Barlow Condensed',sans-serif; font-size:clamp(1.1rem,2.2vw,1.5rem); font-weight:300; color:#999; margin:1.8rem 0 2.5rem; max-width:540px; line-height:1.6; opacity:0; animation:fadeUp 0.7s 1.05s forwards; }
+.hero-tagline strong { color:var(--paper); font-weight:600; }
+.waitlist-wrap { opacity:0; animation:fadeUp 0.7s 1.2s forwards; }
+.waitlist-form { display:flex; max-width:460px; border:1.5px solid var(--rage); position:relative; overflow:hidden; }
+.waitlist-form::after { content:''; position:absolute; left:-100%; top:0; width:60%; height:100%; background:linear-gradient(90deg,transparent,rgba(204,51,0,0.08),transparent); animation:shimmer 3s 2s infinite; }
+@keyframes shimmer { 0%{left:-100%} 100%{left:200%} }
+.waitlist-form input { flex:1; background:transparent; border:none; outline:none; padding:1rem 1.3rem; font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--paper); letter-spacing:1px; }
+.waitlist-form input::placeholder { color:#444; }
+.waitlist-btn { background:var(--rage); color:white; border:none; padding:1rem 1.6rem; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:3px; cursor:pointer; position:relative; overflow:hidden; transition:background 0.2s; white-space:nowrap; }
+.waitlist-btn::before { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.1); transform:translateX(-100%) skewX(-20deg); transition:transform 0.4s; }
+.waitlist-btn:hover::before { transform:translateX(200%) skewX(-20deg); }
+.waitlist-btn:hover { background:var(--rage2); }
+.hero-count { margin-top:0.9rem; font-size:0.62rem; letter-spacing:2px; color:#777; text-transform:uppercase; }
+.hero-count .num { color:var(--warn); font-weight:700; }
+.waitlist-success { display:none; margin-top:0.8rem; font-size:0.62rem; letter-spacing:2px; color:#4caf7d; text-transform:uppercase; }
+
+/* MARQUEE */
+.marquee-strip { position:relative; z-index:2; background:var(--rage); border-top:2px solid #ff6644; border-bottom:2px solid #8a1f00; padding:0.7rem 0; overflow:hidden; }
+.marquee-track { display:flex; width:max-content; animation:marqueeScroll 32s linear infinite; }
+.marquee-track:hover { animation-play-state:paused; }
+.marquee-item { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.9rem; letter-spacing:3px; text-transform:uppercase; white-space:nowrap; padding:0 2rem; color:white; }
+.marquee-sep { color:rgba(255,255,255,0.4); padding:0 0.3rem; }
+@keyframes marqueeScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* STATS */
+.stats-bar { position:relative; z-index:2; display:flex; border-top:1px solid #1a1a1a; border-bottom:1px solid #1a1a1a; }
+.stat-cell { flex:1; padding:2.5rem 2rem; border-right:1px solid #1a1a1a; text-align:center; position:relative; overflow:hidden; transition:background 0.3s; }
+.stat-cell:last-child { border-right:none; }
+.stat-cell:hover { background:rgba(204,51,0,0.05); }
+.stat-cell::before { content:''; position:absolute; bottom:0; left:0; width:0%; height:2px; background:var(--rage); transition:width 0.6s ease; }
+.stat-cell.in-view::before { width:100%; }
+.stat-num { font-family:'Bebas Neue',sans-serif; font-size:3.5rem; line-height:1; color:var(--rage); display:block; }
+.stat-label { font-size:0.6rem; letter-spacing:3px; text-transform:uppercase; color:#999; margin-top:0.3rem; }
+
+/* SECTIONS */
+.section { position:relative; z-index:2; padding:7rem 2.5rem; max-width:1200px; margin:0 auto; }
+.section-full { position:relative; z-index:2; padding:7rem 0; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); border-top:1px solid #111; border-bottom:1px solid #111; }
+.section-full-inner { max-width:1200px; margin:0 auto; padding:0 2.5rem; }
+.label { font-size:0.58rem; letter-spacing:5px; text-transform:uppercase; color:var(--rage); margin-bottom:0.8rem; display:flex; align-items:center; gap:0.8rem; }
+.label::before { content:''; width:20px; height:1.5px; background:var(--rage); }
+.big-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,7vw,6rem); line-height:0.93; letter-spacing:0.01em; margin-bottom:1.5rem; }
+
+/* STEPS */
+.steps-container { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#151515; margin-top:3rem; }
+.step-card { background:var(--ink); padding:2.5rem 1.8rem; position:relative; overflow:hidden; cursor:default; transition:background 0.3s; }
+.step-card:hover { background:#0f0f0f; }
+.step-card::after { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:var(--rage); transform:scaleX(0); transform-origin:left; transition:transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+.step-card:hover::after { transform:scaleX(1); }
+.step-bg-num { position:absolute; bottom:-1rem; right:0.5rem; font-family:'Bebas Neue',sans-serif; font-size:7rem; color:rgba(204,51,0,0.06); line-height:1; pointer-events:none; transition:color 0.3s,transform 0.4s; }
+.step-card:hover .step-bg-num { color:rgba(204,51,0,0.1); transform:scale(1.05); }
+.step-icon-wrap { width:48px; height:48px; border:1.5px solid #222; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1.5rem; transition:border-color 0.3s,transform 0.3s; }
+.step-card:hover .step-icon-wrap { border-color:var(--rage); transform:rotate(5deg) scale(1.1); }
+.step-title { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1.1rem; text-transform:uppercase; letter-spacing:1px; color:var(--paper); margin-bottom:0.6rem; }
+.step-desc { font-size:0.68rem; line-height:1.75; color:#aaa; }
+
+/* FEATURES */
+.features-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5px; background:#111; margin-top:3rem; }
+.feat { background:var(--ink); padding:3rem 2.5rem; position:relative; overflow:hidden; transition:background 0.3s; }
+.feat:hover { background:#0c0c0c; }
+.feat::before { content:''; position:absolute; top:0; left:0; width:60px; height:60px; border-top:3px solid transparent; border-left:3px solid transparent; transition:border-color 0.4s,width 0.4s,height 0.4s; }
+.feat::after { content:''; position:absolute; bottom:0; right:0; width:60px; height:60px; border-bottom:3px solid transparent; border-right:3px solid transparent; transition:border-color 0.4s,width 0.4s,height 0.4s; }
+.feat.gps::before,.feat.gps::after{border-color:var(--rage)}
+.feat.esc::before,.feat.esc::after{border-color:var(--warn)}
+.feat.social::before,.feat.social::after{border-color:var(--blue)}
+.feat.rc::before,.feat.rc::after{border-color:var(--green)}
+.feat:hover::before,.feat:hover::after{width:100%;height:100%}
+.feat-icon { font-size:2.5rem; margin-bottom:1.5rem; display:block; }
+.feat-title { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.8rem; }
+.feat-desc { font-size:0.7rem; line-height:1.85; color:#aaa; }
+.feat-chip { display:inline-block; margin-top:1.2rem; font-size:0.55rem; letter-spacing:3px; text-transform:uppercase; padding:0.35rem 0.8rem; border:1px solid currentColor; }
+.feat.gps .feat-chip{color:var(--rage)} .feat.esc .feat-chip{color:var(--warn)} .feat.social .feat-chip{color:var(--blue)} .feat.rc .feat-chip{color:var(--green)}
+
+/* ESCALATION */
+.esc-label{color:var(--warn)} .esc-label::before{background:var(--warn)}
+.esc-ladder { margin-top:3rem; display:flex; flex-direction:column; }
+.esc-rung { display:grid; grid-template-columns:4px 60px 1fr auto; align-items:stretch; border:1px solid #1a1a1a; border-bottom:none; transition:background 0.25s; overflow:hidden; }
+.esc-rung:last-child { border-bottom:1px solid #1a1a1a; }
+.esc-rung:hover { background:rgba(255,255,255,0.02); }
+.esc-rung-bar { transition:width 0.3s; }
+.esc-rung:hover .esc-rung-bar { width:6px; }
+.t1 .esc-rung-bar{background:#555} .t2 .esc-rung-bar{background:var(--warn)} .t3 .esc-rung-bar{background:var(--rage)} .t4 .esc-rung-bar{background:#ff6644}
+.esc-rung-num { display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:2rem; color:#333; border-right:1px solid #1a1a1a; transition:color 0.3s; }
+.esc-rung:hover .esc-rung-num { color:#555; }
+.esc-rung-body { padding:1.8rem 2rem; display:flex; align-items:center; gap:2rem; flex:1; }
+.esc-rung-name { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px; color:var(--paper); min-width:220px; }
+.esc-rung-desc { font-size:0.67rem; color:#aaa; line-height:1.7; flex:1; }
+.esc-trigger { padding:1.8rem 2rem; text-align:right; flex-shrink:0; border-left:1px solid #1a1a1a; }
+.esc-trigger-label { font-size:0.55rem; letter-spacing:3px; text-transform:uppercase; color:#888; display:block; margin-bottom:0.3rem; }
+.esc-trigger-val { font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--warn); }
+
+/* REPORT CARD */
+.rc-section { position:relative; z-index:2; padding:7rem 2.5rem; max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
+.rc-label{color:var(--green)} .rc-label::before{background:var(--green)}
+.rc-text-body { font-size:0.7rem; color:#aaa; line-height:1.9; margin-top:1rem; }
+.rc-card { border:1px solid #222; background:#0d0d0d; position:relative; overflow:hidden; }
+.rc-card::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:conic-gradient(transparent 0deg,rgba(26,107,58,0.06) 60deg,transparent 120deg); animation:rotateConic 8s linear infinite; }
+@keyframes rotateConic { to{transform:rotate(360deg)} }
+.rc-card-inner { position:relative; z-index:1; }
+.rc-header { background:var(--green); padding:1.2rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
+.rc-ward { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:2px; color:white; }
+.rc-period { font-size:0.58rem; letter-spacing:2px; color:rgba(255,255,255,0.7); text-transform:uppercase; }
+.rc-grade { width:50px; height:50px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--green); animation:gradePulse 2s ease-in-out infinite; }
+@keyframes gradePulse { 0%,100%{box-shadow:0 0 0 0 rgba(26,107,58,0.4)} 50%{box-shadow:0 0 0 8px rgba(26,107,58,0)} }
+.rc-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid #1a1a1a; }
+.rc-stat { padding:1.2rem 1rem; text-align:center; border-right:1px solid #1a1a1a; }
+.rc-stat:last-child{border-right:none}
+.rc-stat-n { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; line-height:1; }
+.rc-stat-n.r{color:var(--rage)} .rc-stat-n.g{color:#4caf7d} .rc-stat-n.w{color:var(--warn)}
+.rc-stat-l { font-size:0.55rem; letter-spacing:2px; text-transform:uppercase; color:#888; margin-top:0.25rem; }
+.rc-bars { padding:1.2rem 1.5rem; border-bottom:1px solid #1a1a1a; }
+.rc-bars-title { font-size:0.55rem; letter-spacing:3px; text-transform:uppercase; color:#888; margin-bottom:1rem; }
+.bar-row { display:flex; align-items:center; gap:0.8rem; margin-bottom:0.65rem; }
+.bar-lbl { font-size:0.62rem; color:#aaa; width:90px; flex-shrink:0; }
+.bar-track { flex:1; height:5px; background:#1a1a1a; overflow:hidden; }
+.bar-fill { height:100%; width:0%; transition:width 1.5s cubic-bezier(0.16,1,0.3,1); }
+.bar-fill.red{background:var(--rage)} .bar-fill.org{background:var(--warn)} .bar-fill.grn{background:#4caf7d}
+.bar-num { font-family:'Space Mono',monospace; font-size:0.6rem; color:#999; width:20px; text-align:right; }
+.rc-official { padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; }
+.official-avatar { width:42px; height:42px; border-radius:50%; background:#1a1a1a; border:1px solid #222; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.official-name { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1rem; color:var(--paper); }
+.official-role { font-size:0.55rem; color:#888; letter-spacing:1px; text-transform:uppercase; }
+.official-score { margin-left:auto; text-align:right; }
+.score-n { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:var(--warn); line-height:1; }
+.score-l { font-size:0.5rem; letter-spacing:2px; text-transform:uppercase; color:#888; }
+
+/* CITIES */
+.cities-section { position:relative; z-index:2; padding:7rem 0; background:rgba(0,0,0,0.7); border-top:1px solid #111; border-bottom:1px solid #111; }
+.cities-inner { max-width:1200px; margin:0 auto; padding:0 2.5rem; }
+.cities-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:#151515; margin-top:3rem; }
+.city-card { background:var(--ink); padding:2rem 1.5rem; position:relative; overflow:hidden; transition:background 0.3s; text-align:center; }
+.city-card:hover { background:#0f0f0f; }
+.city-card::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:2px; background:var(--rage); transform:scaleX(0); transform-origin:left; transition:transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+.city-card:hover::after { transform:scaleX(1); }
+.city-name { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:2px; color:var(--paper); margin-bottom:0.3rem; }
+.city-body { font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:#666; }
+.city-badge { display:inline-block; margin-top:0.6rem; font-size:0.5rem; letter-spacing:2px; text-transform:uppercase; padding:0.2rem 0.5rem; border:1px solid rgba(230,168,23,0.3); color:var(--warn); }
+.city-badge.launch { color:#4caf7d; border-color:rgba(76,175,61,0.3); }
+
+/* MANIFESTO */
+.manifesto { position:relative; z-index:2; background:var(--rage); padding:6rem 2.5rem; overflow:hidden; text-align:center; }
+.manifesto::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(0,0,0,0.04) 30px,rgba(0,0,0,0.04) 60px); }
+.manifesto-quote { position:relative; z-index:1; font-family:'Bebas Neue',sans-serif; font-size:clamp(2.2rem,5.5vw,4.5rem); line-height:1.1; color:white; max-width:900px; margin:0 auto 1.5rem; }
+.manifesto-attr { position:relative; z-index:1; font-size:0.62rem; letter-spacing:4px; color:rgba(255,255,255,0.6); text-transform:uppercase; }
+#kword { display:inline-block; transition:opacity 0.3s,transform 0.3s; color:rgba(255,255,255,0.4); }
+
+/* FINAL CTA */
+.final { position:relative; z-index:2; padding:9rem 2.5rem; text-align:center; overflow:hidden; }
+.final-orb { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(204,51,0,0.12),transparent 70%); animation:orbPulse 5s ease-in-out infinite; pointer-events:none; }
+.final-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(4rem,10vw,9rem); line-height:0.9; position:relative; z-index:1; }
+.final-title .accent { color:var(--rage); }
+.final-sub { font-size:0.65rem; letter-spacing:4px; text-transform:uppercase; color:#888; margin:1.5rem 0 2.5rem; position:relative; z-index:1; }
+.final-form { display:flex; max-width:440px; margin:0 auto; border:1.5px solid var(--rage); position:relative; z-index:1; }
+.final-form input { flex:1; background:transparent; border:none; outline:none; padding:1rem 1.2rem; font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--paper); }
+.final-form input::placeholder { color:#444; }
+.final-btn { background:var(--rage); color:white; border:none; padding:1rem 1.6rem; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:3px; cursor:pointer; transition:background 0.15s; white-space:nowrap; }
+.final-btn:hover { background:var(--rage2); }
+
+/* FOOTER */
+footer { position:relative; z-index:2; background:#040404; border-top:1px solid #111; padding:2rem 2.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+.footer-logo { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:#666; letter-spacing:4px; }
+.footer-logo em { color:var(--rage); font-style:normal; }
+.footer-note { font-size:0.58rem; color:#666; letter-spacing:2px; text-transform:uppercase; }
+
+/* SCROLL REVEAL */
+.sr { opacity:0; transform:translateY(40px); transition:opacity 0.7s ease,transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+.sr.vis { opacity:1; transform:translateY(0); }
+.sr.d1{transition-delay:0.1s} .sr.d2{transition-delay:0.2s} .sr.d3{transition-delay:0.3s} .sr.d4{transition-delay:0.4s}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideRight { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+
+/* MOBILE */
+@media(max-width:900px){
+  .cities-grid{grid-template-columns:repeat(3,1fr)}
+  .steps-container{grid-template-columns:1fr 1fr}
+  .features-grid{grid-template-columns:1fr}
+  .rc-section{grid-template-columns:1fr;gap:3rem}
+  .esc-rung{grid-template-columns:4px 1fr}
+  .esc-rung-num,.esc-trigger{display:none}
+  .stats-bar{flex-wrap:wrap}
+  .stat-cell{flex:1 1 50%;border-bottom:1px solid #1a1a1a}
+  .nav-app-link{display:none}
+}
+@media(max-width:500px){
+  .steps-container{grid-template-columns:1fr}
+  .cities-grid{grid-template-columns:repeat(2,1fr)}
+  nav{padding:1rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">JAWAB<em>DO</em></div>
+  <div class="nav-actions">
+    <a class="nav-app-link" href="app.html">Open App →</a>
+    <button class="nav-pill" onclick="document.getElementById('hero-input').focus()">
+      <span style="width:6px;height:6px;border-radius:50%;background:#ff6644;animation:blink 1s infinite;display:inline-block;"></span>
+      Join Waitlist
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="eyebrow-dot"></div>
+      India's civic accountability app
+    </div>
+    <h1 class="hero-h1">
+      <span class="h1-line">TIRED OF</span>
+      <span class="h1-line">BROKEN</span>
+      <span class="h1-line">INDIA?</span>
+    </h1>
+    <div class="hero-devanagari">जवाब दो &nbsp;·&nbsp; Jawab do. Abhi.</div>
+    <p class="hero-tagline">
+      One photo. One tap. <strong>Jawab do.</strong><br>
+      When officials go silent and your community backs you, your report escalates — automatically, all the way to the top.
+    </p>
+    <div class="waitlist-wrap">
+      <div class="waitlist-form">
+        <input type="email" id="hero-input" placeholder="your@email.com" />
+        <button class="waitlist-btn" onclick="submitWL('hero-input','hero-ok','hero-ct')">JAWAB DO</button>
+      </div>
+      <div class="waitlist-success" id="hero-ok">✓ You're on the list. We'll ping you on launch.</div>
+      <div class="hero-count" id="hero-ct">🔥 <span class="num">312</span> citizens already demanding answers</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-track">
+    <span class="marquee-item">Mumbai <span class="marquee-sep">·</span> Potholes <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Delhi <span class="marquee-sep">·</span> Air Quality <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Bengaluru <span class="marquee-sep">·</span> Waterlogging <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Chennai <span class="marquee-sep">·</span> Garbage <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Hyderabad <span class="marquee-sep">·</span> Broken Roads <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Pune <span class="marquee-sep">·</span> Footpaths <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Kolkata <span class="marquee-sep">·</span> Streetlights <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Ahmedabad <span class="marquee-sep">·</span> Drainage <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Jaipur <span class="marquee-sep">·</span> Illegal Construction <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Lucknow <span class="marquee-sep">·</span> Water Supply <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Mumbai <span class="marquee-sep">·</span> Potholes <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Delhi <span class="marquee-sep">·</span> Air Quality <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Bengaluru <span class="marquee-sep">·</span> Waterlogging <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Chennai <span class="marquee-sep">·</span> Garbage <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Hyderabad <span class="marquee-sep">·</span> Broken Roads <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Pune <span class="marquee-sep">·</span> Footpaths <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Kolkata <span class="marquee-sep">·</span> Streetlights <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Ahmedabad <span class="marquee-sep">·</span> Drainage <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Jaipur <span class="marquee-sep">·</span> Illegal Construction <span class="marquee-sep">→</span></span>
+    <span class="marquee-item">Lucknow <span class="marquee-sep">·</span> Water Supply <span class="marquee-sep">→</span></span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-cell sr">
+    <span class="stat-num" data-target="4800">0</span>
+    <span class="stat-label">Urban Local Bodies Covered</span>
+  </div>
+  <div class="stat-cell sr d1">
+    <span class="stat-num" data-target="4">0</span>
+    <span class="stat-label">Escalation Tiers</span>
+  </div>
+  <div class="stat-cell sr d2">
+    <span class="stat-num" data-target="7">0</span>
+    <span class="stat-label">Min. Days + Community Backing to Escalate</span>
+  </div>
+  <div class="stat-cell sr d3">
+    <span class="stat-num" data-target="0">0</span>
+    <span class="stat-label" style="color:var(--rage)">Complaints Lost Ever</span>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section-full">
+  <div class="section-full-inner">
+    <div class="label sr">How it works</div>
+    <h2 class="big-title sr">Four steps.<br>Zero excuses.</h2>
+    <div class="steps-container">
+      <div class="step-card sr d1">
+        <div class="step-bg-num">01</div>
+        <div class="step-icon-wrap">📸</div>
+        <div class="step-title">Snap &amp; Pin</div>
+        <div class="step-desc">Broken road, dead streetlight, overflowing garbage — photograph it. GPS pins your exact location and auto-detects your municipal ward. 30 seconds, done.</div>
+      </div>
+      <div class="step-card sr d2">
+        <div class="step-bg-num">02</div>
+        <div class="step-icon-wrap">👊</div>
+        <div class="step-title">Community Backs You</div>
+        <div class="step-desc">Your issue hits the ward feed. Neighbours upvote, comment, share. Community backing isn't just moral support — it's the second key that unlocks escalation. Your outrage, made undeniable.</div>
+      </div>
+      <div class="step-card sr d3">
+        <div class="step-bg-num">03</div>
+        <div class="step-icon-wrap">🔺</div>
+        <div class="step-title">Auto-Escalation</div>
+        <div class="step-desc">Officials go silent AND the community is backing it? Jawab Do fires it up the chain — Ward → Municipal → State → Media. No follow-up calls. No begging.</div>
+      </div>
+      <div class="step-card sr d4">
+        <div class="step-bg-num">04</div>
+        <div class="step-icon-wrap">📊</div>
+        <div class="step-title">Public Report Card</div>
+        <div class="step-desc">Every ward graded every month. Every official scored publicly. Permanent, searchable, shareable. No place to hide when election season comes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="label sr">What's inside</div>
+  <h2 class="big-title sr">Built for<br>accountability.</h2>
+  <div class="features-grid">
+    <div class="feat gps sr d1">
+      <span class="feat-icon">📍</span>
+      <div class="feat-title">Photo + GPS Reporting</div>
+      <div class="feat-desc">Every issue geotagged to the exact meter. A photo, a pin, a timestamp — evidence that can't be disputed. Municipal body auto-detected from coordinates. Works across every city and town in India.</div>
+      <div class="feat-chip">iOS &amp; Android</div>
+    </div>
+    <div class="feat esc sr d2">
+      <span class="feat-icon">🔺</span>
+      <div class="feat-title">Escalation Engine</div>
+      <div class="feat-desc">Issues don't rot in a black hole. Jawab Do escalates when officials go silent AND the community has rallied behind the issue. Both signals required — proving it's a shared problem, not a lone complaint. Full timestamped log every step.</div>
+      <div class="feat-chip">Automatic &amp; Transparent</div>
+    </div>
+    <div class="feat social sr d3">
+      <span class="feat-icon">🔥</span>
+      <div class="feat-title">Social Feed &amp; Upvotes</div>
+      <div class="feat-desc">A live ward feed of all reported issues. Upvote what's real. Downvote spam. Comment and share. Your voice has actual structural weight — more community backing means faster escalation.</div>
+      <div class="feat-chip">Ward-level feed</div>
+    </div>
+    <div class="feat rc sr d4">
+      <span class="feat-icon">📋</span>
+      <div class="feat-title">Ward Report Card</div>
+      <div class="feat-desc">Monthly grade for every ward across India. Performance score for every official. Total issues filed, resolved, pending, avg resolution time. Public. Permanent. Screenshot it before you vote.</div>
+      <div class="feat-chip">Monthly · Public · Shareable</div>
+    </div>
+  </div>
+</div>
+
+<!-- ESCALATION LADDER -->
+<div class="section-full">
+  <div class="section-full-inner">
+    <div class="label esc-label sr">Escalation Engine</div>
+    <h2 class="big-title sr">No response +<br>community rage?<br>We go higher.</h2>
+    <div class="esc-ladder">
+      <div class="esc-rung t1 sr">
+        <div class="esc-rung-bar"></div>
+        <div class="esc-rung-num">1</div>
+        <div class="esc-rung-body">
+          <div class="esc-rung-name">Ward Officer / Councillor</div>
+          <div class="esc-rung-desc">First line of responsibility. Notified the moment an issue is filed. Visible to all ward residents on the public feed. Community upvotes start building pressure from day one.</div>
+        </div>
+        <div class="esc-trigger">
+          <span class="esc-trigger-label">Starts at</span>
+          <div class="esc-trigger-val">Issue Filed</div>
+        </div>
+      </div>
+      <div class="esc-rung t2 sr d1">
+        <div class="esc-rung-bar"></div>
+        <div class="esc-rung-num">2</div>
+        <div class="esc-rung-body">
+          <div class="esc-rung-name">Municipal Commissioner</div>
+          <div class="esc-rung-desc">7 days of official silence AND 50+ community upvotes — both required. Proves it's a shared neighbourhood problem, not a lone complaint. Escalation fires with a full timestamped activity log.</div>
+        </div>
+        <div class="esc-trigger">
+          <span class="esc-trigger-label">Both required</span>
+          <div class="esc-trigger-val">7 days silent + 50 👊</div>
+        </div>
+      </div>
+      <div class="esc-rung t3 sr d2">
+        <div class="esc-rung-bar"></div>
+        <div class="esc-rung-num">3</div>
+        <div class="esc-rung-body">
+          <div class="esc-rung-name">State Government / MLA</div>
+          <div class="esc-rung-desc">14 days of no action AND 150+ residents backing the issue. At this point it's not a complaint — it's a constituency verdict. State authority and local MLA both notified. Post goes city-wide.</div>
+        </div>
+        <div class="esc-trigger">
+          <span class="esc-trigger-label">Both required</span>
+          <div class="esc-trigger-val">14 days silent + 150 👊</div>
+        </div>
+      </div>
+      <div class="esc-rung t4 sr d3">
+        <div class="esc-rung-bar"></div>
+        <div class="esc-rung-num">4</div>
+        <div class="esc-rung-body">
+          <div class="esc-rung-name">Media &amp; Civil Society</div>
+          <div class="esc-rung-desc">21 days of complete silence AND 300+ citizens demanding action. The community has spoken loud enough. Issue goes fully public — journalists, RWAs, NGOs. The silence itself becomes the story.</div>
+        </div>
+        <div class="esc-trigger">
+          <span class="esc-trigger-label">Both required</span>
+          <div class="esc-trigger-val">21 days silent + 300 👊</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WARD REPORT CARD -->
+<div class="rc-section">
+  <div>
+    <div class="label rc-label sr">Ward Report Card</div>
+    <h2 class="big-title sr">Every ward.<br>Every month.<br>Public grade.</h2>
+    <p class="rc-text-body sr">
+      Your councillor can't hide behind "we're working on it" anymore. Jawab Do publishes a monthly report for every ward across India — issues filed, resolved, pending, and a performance score for every official.<br><br>
+      Share it to your RWA group. Screenshot it before you vote. Forward it to local press. The data is public, permanent, and yours.
+    </p>
+  </div>
+  <div class="rc-card sr d2">
+    <div class="rc-card-inner">
+      <div class="rc-header">
+        <div>
+          <div class="rc-ward">Bandra West Ward</div>
+          <div class="rc-period">March 2026 · BMC Mumbai</div>
+        </div>
+        <div class="rc-grade">C+</div>
+      </div>
+      <div class="rc-stats">
+        <div class="rc-stat"><div class="rc-stat-n r" data-target="57">0</div><div class="rc-stat-l">Filed</div></div>
+        <div class="rc-stat"><div class="rc-stat-n g" data-target="21">0</div><div class="rc-stat-l">Resolved</div></div>
+        <div class="rc-stat"><div class="rc-stat-n w" data-target="36">0</div><div class="rc-stat-l">Pending</div></div>
+      </div>
+      <div class="rc-bars">
+        <div class="rc-bars-title">Top issues this month</div>
+        <div class="bar-row"><div class="bar-lbl">Potholes</div><div class="bar-track"><div class="bar-fill red" data-w="85"></div></div><div class="bar-num">18</div></div>
+        <div class="bar-row"><div class="bar-lbl">Garbage</div><div class="bar-track"><div class="bar-fill org" data-w="60"></div></div><div class="bar-num">12</div></div>
+        <div class="bar-row"><div class="bar-lbl">Waterlogging</div><div class="bar-track"><div class="bar-fill red" data-w="50"></div></div><div class="bar-num">10</div></div>
+        <div class="bar-row"><div class="bar-lbl">Streetlights</div><div class="bar-track"><div class="bar-fill grn" data-w="35"></div></div><div class="bar-num">7</div></div>
+        <div class="bar-row"><div class="bar-lbl">Others</div><div class="bar-track"><div class="bar-fill org" data-w="20"></div></div><div class="bar-num">10</div></div>
+      </div>
+      <div class="rc-official">
+        <div class="official-avatar">🧑</div>
+        <div>
+          <div class="official-name">Ward Councillor, Bandra West</div>
+          <div class="official-role">BMC · Elected Representative</div>
+        </div>
+        <div class="official-score">
+          <div class="score-n" data-target="38">0</div>
+          <div class="score-l">/ 100 score</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CITIES -->
+<div class="cities-section">
+  <div class="cities-inner">
+    <div class="label sr">Coverage</div>
+    <h2 class="big-title sr">Every city.<br>Every ward.</h2>
+    <div class="cities-grid">
+      <div class="city-card sr d1"><div class="city-name">Mumbai</div><div class="city-body">BMC · 227 Wards</div><div class="city-badge launch">Launch City</div></div>
+      <div class="city-card sr d1"><div class="city-name">Delhi</div><div class="city-body">MCD · 250 Wards</div><div class="city-badge launch">Launch City</div></div>
+      <div class="city-card sr d2"><div class="city-name">Bengaluru</div><div class="city-body">BBMP · 243 Wards</div><div class="city-badge launch">Launch City</div></div>
+      <div class="city-card sr d2"><div class="city-name">Hyderabad</div><div class="city-body">GHMC · 150 Wards</div><div class="city-badge launch">Launch City</div></div>
+      <div class="city-card sr d3"><div class="city-name">Chennai</div><div class="city-body">GCC · 200 Wards</div><div class="city-badge launch">Launch City</div></div>
+      <div class="city-card sr d3"><div class="city-name">Pune</div><div class="city-body">PMC · 41 Prabhags</div><div class="city-badge">Phase 2</div></div>
+      <div class="city-card sr d3"><div class="city-name">Kolkata</div><div class="city-body">KMC · 144 Wards</div><div class="city-badge">Phase 2</div></div>
+      <div class="city-card sr d4"><div class="city-name">Ahmedabad</div><div class="city-body">AMC · 48 Wards</div><div class="city-badge">Phase 2</div></div>
+      <div class="city-card sr d4"><div class="city-name">Jaipur</div><div class="city-body">JMC · 100 Wards</div><div class="city-badge">Phase 2</div></div>
+      <div class="city-card sr d4"><div class="city-name">+4,790<br>More</div><div class="city-body">ULBs across India</div><div class="city-badge">Roadmap</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<div class="manifesto">
+  <div class="manifesto-quote">
+    "The pothole doesn't care about your <span id="kword">vote</span>.<br>
+    But your vote should care about the pothole."
+  </div>
+  <div class="manifesto-attr">— The Jawab Do Manifesto</div>
+</div>
+
+<!-- FINAL CTA -->
+<div class="final">
+  <div class="final-orb"></div>
+  <div class="final-title sr">Demand your<br><span class="accent">Jawab.</span></div>
+  <div class="final-sub sr d1">Launching across India · iOS &amp; Android</div>
+  <div class="final-form sr d2">
+    <input type="email" id="final-input" placeholder="your@email.com" />
+    <button class="final-btn" onclick="submitWL('final-input','final-ok','final-ct')">JAWAB DO</button>
+  </div>
+  <div class="waitlist-success" id="final-ok" style="text-align:center;margin-top:0.8rem;">✓ You're on the list.</div>
+  <div class="hero-count sr d3" id="final-ct" style="margin-top:0.8rem;">🔥 <span class="num">312</span> citizens already demanding answers</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">JAWAB<em>DO</em>.in</div>
+  <div class="footer-note">India · Built by citizens, for citizens</div>
+  <div class="footer-note">© 2026 Jawab Do</div>
+</footer>
+
+<script>
+// PARTICLES
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random()*W; this.y = Math.random()*H;
+    this.vx = (Math.random()-.5)*.4; this.vy = (Math.random()-.5)*.4;
+    this.r = Math.random()*1.5+.3; this.life = Math.random();
+    this.decay = Math.random()*.002+.001;
+    this.color = Math.random() > .7 ? '#CC3300' : '#ffffff';
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy; this.life -= this.decay;
+    if (this.life <= 0 || this.x<0 || this.x>W || this.y<0 || this.y>H) this.reset();
+  }
+  draw() {
+    ctx.save(); ctx.globalAlpha = this.life*.6;
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fillStyle = this.color; ctx.fill(); ctx.restore();
+  }
+}
+function drawConnections() {
+  for (let i=0;i<particles.length;i++) {
+    for (let j=i+1;j<particles.length;j++) {
+      const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if (d<120) {
+        ctx.save(); ctx.globalAlpha=(1-d/120)*.08;
+        ctx.strokeStyle='#CC3300'; ctx.lineWidth=.5;
+        ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke(); ctx.restore();
+      }
+    }
+  }
+}
+for (let i=0;i<80;i++) particles.push(new Particle());
+function animateParticles() {
+  ctx.clearRect(0,0,W,H); drawConnections();
+  particles.forEach(p=>{p.update();p.draw()});
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// SCROLL REVEAL
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('vis');
+      e.target.querySelectorAll('[data-target]').forEach(el => animateCount(el));
+      e.target.querySelectorAll('.bar-fill[data-w]').forEach(b => setTimeout(()=>b.style.width=b.dataset.w+'%',300));
+      if (e.target.classList.contains('stat-cell')) {
+        e.target.classList.add('in-view');
+        const n = e.target.querySelector('.stat-num[data-target]');
+        if (n) animateCount(n);
+      }
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.sr,.stat-cell').forEach(el => io.observe(el));
+
+const rcCard = document.querySelector('.rc-card');
+if (rcCard) {
+  const rcIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.bar-fill[data-w]').forEach(b=>setTimeout(()=>b.style.width=b.dataset.w+'%',400));
+        e.target.querySelectorAll('[data-target]').forEach(el=>animateCount(el));
+        rcIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  rcIO.observe(rcCard);
+}
+
+// COUNT-UP
+function animateCount(el) {
+  const target = parseInt(el.dataset.target);
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min((now-start)/1600,1);
+    const ease = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(target*ease);
+    if (p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// KINETIC WORD
+const words = ['vote','anger','photo','voice','Jawab'];
+let wi=0;
+const kword = document.getElementById('kword');
+setInterval(()=>{
+  wi=(wi+1)%words.length;
+  kword.style.opacity='0'; kword.style.transform='translateY(8px)';
+  setTimeout(()=>{
+    kword.textContent=words[wi];
+    kword.style.color = wi===words.length-1 ? 'white' : 'rgba(255,255,255,0.4)';
+    kword.style.opacity='1'; kword.style.transform='translateY(0)';
+  },300);
+},1800);
+
+// WAITLIST
+const _sb = supabase.createClient(
+  'https://zljjkbbkuuwhnzzdcjjr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsamprYmJrdXV3aG56emRjampyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTc3NzcsImV4cCI6MjA4OTc3Mzc3N30.ZzGjqTujxA-MA9usRegK8nWNw5MmMYK9UYWd1cJBtDo'
+);
+
+async function loadWaitlistCount() {
+  const { data } = await _sb.rpc('get_waitlist_count');
+  if (data != null) document.querySelectorAll('.num').forEach(el => el.textContent = data);
+}
+loadWaitlistCount();
+
+async function submitWL(inputId,successId,countId) {
+  const input=document.getElementById(inputId);
+  const email=input.value.trim();
+  if (!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    input.style.outline='1px solid #ff4422';
+    input.placeholder='Valid email please'; input.value='';
+    setTimeout(()=>{input.style.outline='';input.placeholder='your@email.com';},2500);
+    return;
+  }
+  const { error } = await _sb.from('waitlist').insert({ email });
+  if (error && error.code === '23505') {
+    // duplicate — already on list, still show success
+  } else if (error) {
+    input.style.outline='1px solid #ff4422';
+    input.placeholder='Something went wrong, try again'; input.value='';
+    setTimeout(()=>{input.style.outline='';input.placeholder='your@email.com';},3000);
+    return;
+  }
+  input.value=''; input.placeholder='See you on launch day 🔥';
+  document.getElementById(successId).style.display='block';
+  loadWaitlistCount();
+  setTimeout(()=>{document.getElementById(successId).style.display='none';},5000);
+}
+document.querySelectorAll('input[type="email"]').forEach(inp=>{
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.nextElementSibling?.click();});
+});
+</script>
+</body>
+</html>
